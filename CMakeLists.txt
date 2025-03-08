@@ -21,9 +21,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(userver)
 #
 
-# Вызов настройки окружения userver
-userver_setup_environment()
-#
 add_executable(${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME} userver::postgresql)
 
