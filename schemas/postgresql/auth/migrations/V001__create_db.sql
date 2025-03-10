@@ -1,0 +1,16 @@
+DROP TABLE IF EXISTS tokens;
+DROP TABLE IF EXISTS users;
+
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    registration_date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    role TEXT NOT NULL
+);
+
+CREATE TABLE tokens (
+    token TEXT PRIMARY KEY NOT NULL,
+    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    expiry_date TIMESTAMPTZ NOT NULL
+);
