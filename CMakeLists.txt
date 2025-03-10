@@ -20,15 +20,32 @@ FetchContent_MakeAvailable(userver)
 
 userver_setup_environment()
 
-add_executable(${PROJECT_NAME} main.cpp auth_bearer.cpp)
-target_link_libraries(${PROJECT_NAME} userver::postgresql)
+# auth
+add_library(${PROJECT_NAME}_auth_objs OBJECT
+    src/auth/auth_bearer.hpp
+    src/auth/auth_bearer.cpp
+    src/auth/user_info_cache.hpp
+)
+target_link_libraries(${PROJECT_NAME}_auth_objs userver::core userver::postgresql)
+target_include_directories(${PROJECT_NAME}_auth_objs PUBLIC src/auth)
+#
 
-# # config connection to the project
-# userver_embed_file(${PROJECT_NAME}_config
-#     NAME static_config_yaml
-#     FILEPATH static_config.yaml
-# )
-# target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_config)
-# #
+# handlers
+## role_test_handlers
+add_library(${PROJECT_NAME}_role_test_handlers_objs OBJECT
+    src/handlers/handlers_for_test/role_test_handlers.hpp
+    src/handlers/handlers_for_test/role_test_handlers.cpp
+)
+target_link_libraries(${PROJECT_NAME}_role_test_handlers_objs userver::core)
+target_include_directories(${PROJECT_NAME}_role_test_handlers_objs PUBLIC src/handlers/handlers_for_test)
+##
+#
+
+add_executable(${PROJECT_NAME} main.cpp)
+target_link_libraries(${PROJECT_NAME}
+    ${PROJECT_NAME}_auth_objs
+    ${PROJECT_NAME}_role_test_handlers_objs
+    userver::postgresql
+)
 
 userver_testsuite_add_simple()
