@@ -24,9 +24,7 @@ private:
     const AuthCache& auth_cache_;
     const std::vector<userver::server::auth::UserScope> required_scopes_;
 };
-/// [auth checker declaration]
 
-/// [auth checker definition 1]
 AuthCheckerBearer::AuthCheckResult AuthCheckerBearer::CheckAuth(
     const userver::server::http::HttpRequest& request,
     userver::server::request::RequestContext& request_context
@@ -39,9 +37,7 @@ AuthCheckerBearer::AuthCheckResult AuthCheckerBearer::CheckAuth(
             "Empty 'Authorization' header",
             userver::server::handlers::HandlerErrorCode::kUnauthorized};
     }
-    /// [auth checker definition 1]
 
-    /// [auth checker definition 2]
     const auto bearer_sep_pos = auth_value.find(' ');
     if (bearer_sep_pos == std::string::npos || std::string_view{auth_value.data(), bearer_sep_pos} != "Bearer") {
         return AuthCheckResult{
@@ -50,9 +46,7 @@ AuthCheckerBearer::AuthCheckResult AuthCheckerBearer::CheckAuth(
             "'Authorization' header should have 'Bearer some-token' format",
             userver::server::handlers::HandlerErrorCode::kUnauthorized};
     }
-    /// [auth checker definition 2]
 
-    /// [auth checker definition 3]
     const userver::server::auth::UserAuthInfo::Ticket token{auth_value.data() + bearer_sep_pos + 1};
     const auto cache_snapshot = auth_cache_.Get();
 
@@ -60,10 +54,16 @@ AuthCheckerBearer::AuthCheckResult AuthCheckerBearer::CheckAuth(
     if (it == cache_snapshot->end()) {
         return AuthCheckResult{AuthCheckResult::Status::kForbidden};
     }
-    /// [auth checker definition 3]
 
-    /// [auth checker definition 4]
-    const UserDbInfo& info = it->second;
+    const UserDbInfo& info = it->second; 
+    if (info.expiry_date < userver::storages::postgres::Now()) {
+        return AuthCheckResult{
+            AuthCheckResult::Status::kInvalidToken,
+            {},
+            "Token is expired",
+            userver::server::handlers::HandlerErrorCode::kUnauthorized};
+    }
+
     auto rolePriority = [](const std::string& role) -> int {
         if (role == "User") return 1;
         if (role == "Moderator") return 2;
@@ -71,15 +71,13 @@ AuthCheckerBearer::AuthCheckResult AuthCheckerBearer::CheckAuth(
         return 0;
     };
     if (rolePriority(info.role) < rolePriority(required_scopes_[0].GetValue()))
-        return AuthCheckResult{AuthCheckResult::Status::kForbidden, {}, "No '" + required_scopes_[0].GetValue() + "' permission"};
-    /// [auth checker definition 4]
+        return 
+        {AuthCheckResult::Status::kForbidden, {}, "No '" + required_scopes_[0].GetValue() + "' permission"};
 
-    /// [auth checker definition 5]
     request_context.SetData("username", info.username);
     request_context.SetData("role", info.role);
     return {};
 }
-/// [auth checker definition 5]
 
 /// [auth checker factory definition]
 userver::server::handlers::auth::AuthCheckerBasePtr CheckerFactory::
