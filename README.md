@@ -10,5 +10,5 @@ chmod +x build.sh
 ```
 2. Запустить
 ```bash
-./build/IIM --config <path/to/the/static_config.yaml>
+./build/IIM --config <path/to/the/static_config.yaml> --config_vars <path/to/the/config_vars.yaml>
 ```
