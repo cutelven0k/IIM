@@ -55,7 +55,7 @@ AuthCheckerBearer::AuthCheckResult AuthCheckerBearer::CheckAuth(
         return AuthCheckResult{AuthCheckResult::Status::kForbidden};
     }
 
-    const UserDbInfo& info = it->second; 
+    const UserDbInfo& info = it->second;
     if (info.expiry_date < userver::storages::postgres::Now()) {
         return AuthCheckResult{
             AuthCheckResult::Status::kInvalidToken,
@@ -71,8 +71,7 @@ AuthCheckerBearer::AuthCheckResult AuthCheckerBearer::CheckAuth(
         return 0;
     };
     if (rolePriority(info.role) < rolePriority(required_scopes_[0].GetValue()))
-        return 
-        {AuthCheckResult::Status::kForbidden, {}, "No '" + required_scopes_[0].GetValue() + "' permission"};
+        return {AuthCheckResult::Status::kForbidden, {}, "No '" + required_scopes_[0].GetValue() + "' permission"};
 
     request_context.SetData("username", info.username);
     request_context.SetData("role", info.role);
