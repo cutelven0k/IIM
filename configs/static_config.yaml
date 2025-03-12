@@ -1,8 +1,5 @@
-# yaml
 components_manager:
     components:                       # Configuring components that were registered via component_list
-        # /// [pg-cache config]
-        # yaml
         auth-database:
             dbconnection: $dbconnection
             blocking_task_processor: fs-task-processor
@@ -11,10 +8,17 @@ components_manager:
         auth-pg-cache:
             pgcomponent: auth-database
             update-interval: 10s
-        # /// [pg-cache config]
 
-        # /// [handlers]
-        # yaml
+        # handlers
+        handler-sign-in:
+            path: /v1/sign-in
+            task_processor: main-task-processor
+            method: POST
+        handler-sign-up:
+            path: /v1/sign-up
+            task_processor: main-task-processor
+            method: POST
+        
         handler-admin:
             path: /v1/admin
             task_processor: main-task-processor
@@ -42,7 +46,6 @@ components_manager:
                   - bearer
                 scopes:
                   - Moderator
-        # /// [hello config]
 
         testsuite-support:
 

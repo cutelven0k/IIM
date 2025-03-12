@@ -1,6 +1,7 @@
 #include <auth_bearer.hpp>
 #include <user_info_cache.hpp>
 #include <role_test_handlers.hpp>
+#include <sign_in_up.hpp>
 
 #include <userver/clients/dns/component.hpp>
 #include <userver/testsuite/testsuite_support.hpp>
@@ -19,6 +20,8 @@ int main(int charc, const char* const charv[]) {
     const auto component_list = userver::components::MinimalServerComponentList()
                                     .Append<AuthCache>()
                                     .Append<userver::components::Postgres>("auth-database")
+                                    .Append<SignIn>()
+                                    .Append<SignUp>()
                                     .Append<UserHandler>()
                                     .Append<AdminHandler>()
                                     .Append<ModeratorHandler>()
