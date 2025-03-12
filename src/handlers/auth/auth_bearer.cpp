@@ -74,6 +74,7 @@ AuthCheckerBearer::AuthCheckResult AuthCheckerBearer::CheckAuth(
         return {AuthCheckResult::Status::kForbidden, {}, "No '" + required_scopes_[0].GetValue() + "' permission"};
 
     request_context.SetData("username", info.username);
+    request_context.SetData("user_id", info.user_id);
     request_context.SetData("role", info.role);
     return {};
 }
