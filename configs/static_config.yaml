@@ -59,7 +59,7 @@ components_manager:
             loggers:
                 default:
                     file_path: $log_file_path
-                    level: debug
+                    level: error
                     overflow_behavior: discard  # Drop logs if the system is too busy to write them down.
 
         dns-client:

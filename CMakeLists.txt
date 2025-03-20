@@ -59,4 +59,7 @@ target_link_libraries(${PROJECT_NAME}
     userver::postgresql
 )
 
-userver_testsuite_add_simple()
+userver_testsuite_add_simple(
+    PYTEST_ARGS
+    --service-logs-pretty
+)
