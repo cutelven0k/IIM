@@ -13,22 +13,79 @@ set(USERVER_FEATURE_POSTGRESQL ON CACHE BOOL "Enable PostgreSQL support")
 FetchContent_Declare(
     userver
     GIT_REPOSITORY https://github.com/userver-framework/userver.git
-    GIT_TAG develop
+    GIT_TAG v2.7
 )
 FetchContent_MakeAvailable(userver)
 #
 
 userver_setup_environment()
 
-add_executable(${PROJECT_NAME} main.cpp auth_bearer.cpp)
-target_link_libraries(${PROJECT_NAME} userver::postgresql)
 
-# # config connection to the project
-# userver_embed_file(${PROJECT_NAME}_config
-#     NAME static_config_yaml
-#     FILEPATH static_config.yaml
-# )
-# target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_config)
-# #
+# utils
+## string_json_response
+add_library(${PROJECT_NAME}_string_json_response_objs OBJECT
+    src/utils/string_json_response.hpp
+    src/utils/string_json_response.cpp
+)
+target_link_libraries(${PROJECT_NAME}_string_json_response_objs
+    userver::core
+)
+target_include_directories(${PROJECT_NAME}_string_json_response_objs PUBLIC src/utils)
+##
+## json_process
+add_library(${PROJECT_NAME}_json_process_objs OBJECT
+    src/utils/json_process.hpp
+    src/utils/json_process.cpp
+)
+target_link_libraries(${PROJECT_NAME}_json_process_objs
+    ${PROJECT_NAME}_string_json_response_objs
+    userver::core
+)
+target_include_directories(${PROJECT_NAME}_json_process_objs PUBLIC src/utils)
+##
+#
+#
+# handlers
+## auth
+### bearer
+add_library(${PROJECT_NAME}_auth_objs OBJECT
+    src/handlers/auth/auth_bearer.hpp
+    src/handlers/auth/auth_bearer.cpp
+    src/handlers/auth/user_info_cache.hpp
+)
+target_link_libraries(${PROJECT_NAME}_auth_objs
+    ${PROJECT_NAME}_string_json_response_objs
+    userver::core
+    userver::postgresql
+)
+target_include_directories(${PROJECT_NAME}_auth_objs PUBLIC src/handlers/auth)
+###
+##
+## review
+add_library(${PROJECT_NAME}_review_objs OBJECT
+    src/handlers/review/review.hpp
+    src/handlers/review/review.cpp
+)
+target_link_libraries(${PROJECT_NAME}_review_objs
+    ${PROJECT_NAME}_string_json_response_objs
+    ${PROJECT_NAME}_json_process_objs
+    userver::core
+    userver::postgresql
+)
+target_include_directories(${PROJECT_NAME}_review_objs PUBLIC src/handlers/review)
+##
+#
+
+
+
+
+add_executable(${PROJECT_NAME} src/main.cpp)
+target_link_libraries(${PROJECT_NAME}
+    ${PROJECT_NAME}_auth_objs
+    ${PROJECT_NAME}_review_objs
+    ${PROJECT_NAME}_string_json_response_objs
+    ${PROJECT_NAME}_json_process_objs
+    userver::postgresql
+)
 
 userver_testsuite_add_simple()
