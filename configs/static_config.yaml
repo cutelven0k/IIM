@@ -9,38 +9,30 @@ components_manager:
             pgcomponent: auth-database
             update-interval: 10s
 
-        # handlers
-        handler-sign-in:
-            path: /v1/sign-in
-            task_processor: main-task-processor
-            method: POST
-        handler-sign-up:
-            path: /v1/sign-up
-            task_processor: main-task-processor
-            method: POST
-        
-        handler-admin:
-            path: /v1/admin
-            task_processor: main-task-processor
-            method: GET
-            auth:           # Authorization config for this handler
-                types:
-                  - bearer  # Authorization type that was specified in main()
-                scopes:     # Required user scopes for that handler
-                  - Admin
-        handler-user:
-            path: /v1/user
+        handler-get-for-moderation:
+            path: /v1/get-for-moderation
             task_processor: main-task-processor
             method: GET
             auth:
                 types:
                   - bearer
                 scopes:
-                  - User
-        handler-moderator:
-            path: /v1/moderator
+                  - Moderator
+
+        handler-delete-from-moderation:
+            path: /v1/delete-from-moderation
             task_processor: main-task-processor
-            method: GET
+            method: DELETE
+            auth:
+                types:
+                  - bearer
+                scopes:
+                  - Moderator
+
+        handler-add-obj:
+            path: /v1/add-obj
+            task_processor: main-task-processor
+            method: POST
             auth:
                 types:
                   - bearer
@@ -59,7 +51,7 @@ components_manager:
             loggers:
                 default:
                     file_path: $log_file_path
-                    level: error
+                    level: warning
                     overflow_behavior: discard  # Drop logs if the system is too busy to write them down.
 
         dns-client:
