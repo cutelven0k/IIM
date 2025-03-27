@@ -1,6 +1,5 @@
 #include <auth_bearer.hpp>
 #include <user_info_cache.hpp>
-#include <role_test_handlers.hpp>
 #include <sign_in_up.hpp>
 
 #include <userver/clients/dns/component.hpp>
@@ -22,9 +21,6 @@ int main(int charc, const char* const charv[]) {
                                     .Append<userver::components::Postgres>("auth-database")
                                     .Append<SignIn>()
                                     .Append<SignUp>()
-                                    .Append<UserHandler>()
-                                    .Append<AdminHandler>()
-                                    .Append<ModeratorHandler>()
                                     .Append<userver::components::TestsuiteSupport>()
                                     .Append<userver::clients::dns::Component>();
     return userver::utils::DaemonMain(charc, charv, component_list);
