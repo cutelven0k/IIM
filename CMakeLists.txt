@@ -20,46 +20,66 @@ FetchContent_MakeAvailable(userver)
 
 userver_setup_environment()
 
+# utils
+## string_json_response
+add_library(${PROJECT_NAME}_string_json_response_objs OBJECT
+    src/utils/string_json_response.hpp
+    src/utils/string_json_response.cpp
+)
+target_link_libraries(${PROJECT_NAME}_string_json_response_objs
+    userver::core
+)
+target_include_directories(${PROJECT_NAME}_string_json_response_objs PUBLIC src/utils)
+##
+## json_process
+add_library(${PROJECT_NAME}_json_process_objs OBJECT
+    src/utils/json_process.hpp
+    src/utils/json_process.cpp
+)
+target_link_libraries(${PROJECT_NAME}_json_process_objs
+    ${PROJECT_NAME}_string_json_response_objs
+    userver::core
+)
+target_include_directories(${PROJECT_NAME}_json_process_objs PUBLIC src/utils)
+##
+#
+
 # handlers
 ## auth
-### 
-### bearer
 add_library(${PROJECT_NAME}_auth_objs OBJECT
     src/handlers/auth/auth_bearer.hpp
     src/handlers/auth/auth_bearer.cpp
     src/handlers/auth/user_info_cache.hpp
 )
-target_link_libraries(${PROJECT_NAME}_auth_objs userver::core userver::postgresql)
+target_link_libraries(${PROJECT_NAME}_auth_objs
+    ${PROJECT_NAME}_string_json_response_objs
+    userver::core
+    userver::postgresql
+)
 target_include_directories(${PROJECT_NAME}_auth_objs PUBLIC src/handlers/auth)
-###
-### sign_in_up
+##
+## sign_in_up
 add_library(${PROJECT_NAME}_sign_in_up_objs OBJECT
-    src/handlers/auth/sign_in_up.hpp
-    src/handlers/auth/sign_in_up.cpp
+    src/handlers/sign_in_up/sign_in_up.hpp
+    src/handlers/sign_in_up/sign_in_up.cpp
 )
-target_link_libraries(${PROJECT_NAME}_sign_in_up_objs userver::core userver::postgresql)
-target_include_directories(${PROJECT_NAME}_sign_in_up_objs PUBLIC src/handlers/auth)
-###
-### role_test_handlers
-add_library(${PROJECT_NAME}_role_test_handlers_objs OBJECT
-    src/handlers/handlers_for_test/role_test_handlers.hpp
-    src/handlers/handlers_for_test/role_test_handlers.cpp
+target_link_libraries(${PROJECT_NAME}_sign_in_up_objs
+    ${PROJECT_NAME}_string_json_response_objs
+    ${PROJECT_NAME}_json_process_objs
+    userver::core 
+    userver::postgresql
 )
-target_link_libraries(${PROJECT_NAME}_role_test_handlers_objs userver::core)
-target_include_directories(${PROJECT_NAME}_role_test_handlers_objs PUBLIC src/handlers/handlers_for_test)
-###
+target_include_directories(${PROJECT_NAME}_sign_in_up_objs PUBLIC src/handlers/sign_in_up)
 ##
 #
 
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp)
 target_link_libraries(${PROJECT_NAME}
     ${PROJECT_NAME}_auth_objs
-    ${PROJECT_NAME}_role_test_handlers_objs
     ${PROJECT_NAME}_sign_in_up_objs
+    ${PROJECT_NAME}_string_json_response_objs
+    ${PROJECT_NAME}_json_process_objs
     userver::postgresql
 )
 
-userver_testsuite_add_simple(
-    PYTEST_ARGS
-    --service-logs-pretty
-)
+userver_testsuite_add_simple()
