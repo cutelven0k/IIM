@@ -3,8 +3,8 @@
 set -euo pipefail
 
 DB_URL="postgresql://postgres:qwerty@localhost:5436/postgres"
-MIGRATIONS_DIR="schemas/postgresql/auth/migrations"
-MIGRATIONS_LIST="schemas/postgresql/auth/migrations.txt"
+MIGRATIONS_DIR="../schemas/postgresql/auth/migrations"
+MIGRATIONS_LIST="../schemas/postgresql/auth/migrations.txt"
 
 while read -r migration; do
     echo "Applying migration: $MIGRATIONS_DIR/$migration"
