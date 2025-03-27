@@ -2,6 +2,7 @@
 #include "auth_bearer.hpp"
 #include "user_info_cache.hpp"
 
+#include <string_json_response.hpp>
 #include <algorithm>
 
 #include <userver/http/common_headers.hpp>
@@ -34,7 +35,7 @@ AuthCheckerBearer::AuthCheckResult AuthCheckerBearer::CheckAuth(
         return AuthCheckResult{
             AuthCheckResult::Status::kTokenNotFound,
             {},
-            "Empty 'Authorization' header",
+            ErrorResponse("Empty 'Authorization' header"),
             userver::server::handlers::HandlerErrorCode::kUnauthorized};
     }
 
@@ -43,7 +44,7 @@ AuthCheckerBearer::AuthCheckResult AuthCheckerBearer::CheckAuth(
         return AuthCheckResult{
             AuthCheckResult::Status::kTokenNotFound,
             {},
-            "'Authorization' header should have 'Bearer some-token' format",
+            ErrorResponse("'Authorization' header should have 'Bearer some-token' format"),
             userver::server::handlers::HandlerErrorCode::kUnauthorized};
     }
 
@@ -52,7 +53,10 @@ AuthCheckerBearer::AuthCheckResult AuthCheckerBearer::CheckAuth(
 
     auto it = cache_snapshot->find(token);
     if (it == cache_snapshot->end()) {
-        return AuthCheckResult{AuthCheckResult::Status::kForbidden};
+            return AuthCheckResult{AuthCheckResult::Status::kInvalidToken,
+            {},
+            ErrorResponse("Invalid token"),
+            userver::server::handlers::HandlerErrorCode::kUnauthorized};
     }
 
     const UserDbInfo& info = it->second;
@@ -60,7 +64,7 @@ AuthCheckerBearer::AuthCheckResult AuthCheckerBearer::CheckAuth(
         return AuthCheckResult{
             AuthCheckResult::Status::kInvalidToken,
             {},
-            "Token is expired",
+            ErrorResponse("Token is expired"),
             userver::server::handlers::HandlerErrorCode::kUnauthorized};
     }
 
@@ -71,7 +75,11 @@ AuthCheckerBearer::AuthCheckResult AuthCheckerBearer::CheckAuth(
         return 0;
     };
     if (rolePriority(info.role) < rolePriority(required_scopes_[0].GetValue()))
-        return {AuthCheckResult::Status::kForbidden, {}, "No '" + required_scopes_[0].GetValue() + "' permission"};
+        return AuthCheckResult{
+            AuthCheckResult::Status::kForbidden,
+            {},
+            ErrorResponse("No '" + required_scopes_[0].GetValue() + "' permission"),
+            userver::server::handlers::HandlerErrorCode::kForbidden};
 
     request_context.SetData("username", info.username);
     request_context.SetData("user_id", info.user_id);
