@@ -7,7 +7,7 @@
 
 struct UserDbInfo {
     userver::server::auth::UserAuthInfo::Ticket token;
-    std::int64_t user_id;
+    int user_id;
     std::string role;
     std::string username;
     userver::storages::postgres::TimePointTz expiry_date;
