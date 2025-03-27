@@ -1,0 +1,2 @@
+dbconnection: 'postgresql://postgres:qwerty@localhost:5436/postgres'
+log_file_path: './logs/logs.txt'
